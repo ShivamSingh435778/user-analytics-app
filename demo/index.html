@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sample Store — Analytics Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, Arial, sans-serif; color: #182230; background: #f5f7fb; }
+    header { padding: 24px clamp(20px, 6vw, 80px); color: white; background: #25264b; }
+    header small { color: #c8c9f8; letter-spacing: .12em; text-transform: uppercase; }
+    main { max-width: 1080px; margin: 38px auto; padding: 0 20px; }
+    .hero { padding: 34px; border-radius: 20px; background: white; box-shadow: 0 8px 30px #19213a0b; }
+    .hero h1 { margin-top: 0; font-size: clamp(28px, 5vw, 44px); }
+    .products { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 18px; margin-top: 20px; }
+    .card { padding: 22px; border: 1px solid #e6e9f1; border-radius: 16px; background: white; }
+    .emoji { font-size: 38px; }
+    button { border: 0; border-radius: 10px; padding: 12px 16px; background: #5556d9; color: white; cursor: pointer; font-weight: 650; }
+    button:hover { background: #4142bd; }
+    .notice { margin-top: 22px; padding: 14px 16px; border-radius: 12px; background: #ececff; color: #34358c; }
+    footer { padding: 30px; text-align: center; color: #6b7280; }
+  </style>
+  <script>window.USER_ANALYTICS_API_URL = "http://localhost:5000/api/events";</script>
+  <script defer src="/tracker/tracker.js"></script>
+</head>
+<body>
+  <header>
+    <small>Demo storefront</small>
+    <h2>Everyday Goods</h2>
+  </header>
+  <main>
+    <section class="hero">
+      <h1>A little store for everyday essentials.</h1>
+      <p>This sample page generates analytics events. Refresh the page, click buttons, and then inspect the dashboard.</p>
+      <button id="explore">Explore collection</button>
+      <div class="notice" id="notice" aria-live="polite">Tracking demo is ready. Your clicks are sent to the local API.</div>
+    </section>
+    <section class="products" aria-label="Sample products">
+      <article class="card"><div class="emoji">🎧</div><h3>Studio Headphones</h3><p>Comfort for your everyday listening.</p><button class="product-button">View headphones</button></article>
+      <article class="card"><div class="emoji">☕</div><h3>Morning Mug</h3><p>A simple favourite for slow mornings.</p><button class="product-button">View mug</button></article>
+      <article class="card"><div class="emoji">🎒</div><h3>Daily Backpack</h3><p>Room for all the things you carry.</p><button class="product-button">View backpack</button></article>
+    </section>
+  </main>
+  <footer>Sample storefront for the User Analytics assignment</footer>
+  <script>
+    document.getElementById("explore").addEventListener("click", function () {
+      document.getElementById("notice").textContent = "Collection explored — check the dashboard to see this click.";
+      document.querySelector(".products").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    document.querySelectorAll(".product-button").forEach(function (button) {
+      button.addEventListener("click", function () {
+        document.getElementById("notice").textContent = button.textContent + " — this interaction has been tracked.";
+      });
+    });
+  </script>
+</body>
+</html>
