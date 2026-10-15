@@ -15,6 +15,7 @@ app.use(cors({
     : true
 }));
 app.use(express.json({ limit: "32kb" }));
+app.use(express.static('public'));
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", database: mongoose.connection.readyState === 1 ? "connected" : "disconnected" });
