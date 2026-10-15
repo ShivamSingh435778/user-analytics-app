@@ -8,6 +8,10 @@ const eventRoutes = require("./routes/events");
 
 const app = express();
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
 const PORT = Number(process.env.PORT) || 10000;
 
 app.use(cors({
