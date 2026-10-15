@@ -87,8 +87,12 @@ app.get("/api/heatmap", async (req, res, next) => {
 });
 
 // Make the demo available from the backend origin, avoiding file:// CORS issues.
-app.use("/demo", express.static(path.join(__dirname, "demo")));
-app.get("/tracker/tracker.js", (_req, res) => res.sendFile(path.join(__dirname, "tracker", "tracker.js")));
+app.get("/demo", (req, res) => {
+  res.sendFile(path.join(__dirname, "../demo/index.html"));
+});
+app.get("/tracker/tracker.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "../tracker/tracker.js"));
+});
 
 app.use((error, _req, res, _next) => {
   console.error(error);
