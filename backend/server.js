@@ -7,7 +7,7 @@ const Event = require("./models/Event");
 const eventRoutes = require("./routes/events");
 
 const app = express();
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 10000;
 
 app.use(cors({
   origin: process.env.CLIENT_ORIGIN
@@ -50,7 +50,6 @@ app.get("/api/sessions", async (_req, res, next) => {
   }
 });
 
-// Ordered user journey for a particular session.
 app.get("/api/sessions/:sessionId/events", async (req, res, next) => {
   try {
     const events = await Event.find({ session_id: req.params.sessionId })
@@ -63,7 +62,6 @@ app.get("/api/sessions/:sessionId/events", async (req, res, next) => {
   }
 });
 
-// Click points for the selected page URL.
 app.get("/api/heatmap", async (req, res, next) => {
   try {
     const pageUrl = req.query.url;
@@ -86,13 +84,7 @@ app.get("/api/heatmap", async (req, res, next) => {
   }
 });
 
-// Make the demo available from the backend origin, avoiding file:// CORS issues.
-const express = require('express');
-const path = require('path');
-const app = express();
-
-const PORT = process.env.PORT || 10000;
-
+// Make the demo available from the backend origin
 const demoPath = path.resolve(__dirname, '../demo');
 const trackerPath = path.resolve(__dirname, '../tracker');
 
@@ -102,23 +94,12 @@ console.log("Tracker path:", trackerPath);
 app.use("/demo", express.static(demoPath));
 app.use("/tracker", express.static(trackerPath));
 
-app.get("/demo", (req, res) => {
-  res.sendFile(path.join(demoPath, "index.html"));
-});
-
 app.get("/tracker/tracker.js", (req, res) => {
   res.sendFile(path.join(trackerPath, "tracker.js"));
 });
 
 app.get("/", (req, res) => {
   res.redirect("/demo");
-});
-
-// API routes tere jo bhi hain wo iske neeche rehne de
-// ...
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
 
 app.use((error, _req, res, _next) => {
