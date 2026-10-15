@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+<h1 class="text-3xl font-bold mb-6">📊 Live Analytics Dashboard</h1>
+<div id="stats" class="grid grid-cols-3 gap-4 mb-6"></div>
+<table class="w-full bg-white rounded shadow">
+<thead class="bg-black text-white">
+<tr><th class="p-3">Session ID</th><th class="p-3">Clicks</th><th class="p-3">Page Views</th><th class="p-3">Time</th></tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+
+<script>
+async function load() {
+  const res = await fetch('/api/sessions');
+  const data = await res.json();
+  let totalClicks = 0;
+  let totalViews = 0;
+  data.forEach(s => { totalClicks += s.clicks || 0; totalViews += s.page_views || 0; });
+  
+  document.getElementById('stats').innerHTML = `
+    <div class="bg-white p-4 rounded shadow">Total Sessions: <b>${data.length}</b></div>
+    <div class="bg-white p-4 rounded shadow">Total Clicks: <b>${totalClicks}</b></div>
+    <div class="bg-white p-4 rounded shadow">Total Views: <b>${totalViews}</b></div>
+  `;
+
+  document.getElementById('table').innerHTML = data.map(s => `
+    <tr class="border-b"><td class="p-3">${s.session_id.slice(0,8)}...</td><td class="p-3">${s.clicks || 0}</td><td class="p-3">${s.page_views || 0}</td><td class="p-3">${new Date(s.createdAt).toLocaleString()}</td></tr>
+  `).join('');
+}
+load();
+setInterval(load, 5000);
+</script>
+</body>
+</html>
