@@ -1,61 +1,35 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>Live Analytics Dashboard</title>
-<style>
-body{font-family:Arial;padding:20px;background:#f5f5f5}
-h1{background:#fff;padding:15px;border-radius:8px}
-.cards{display:flex;gap:15px;margin:20px 0;flex-wrap:wrap}
-.card{background:#fff;padding:20px;border-radius:8px;flex:1;min-width:150px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-.card b{font-size:22px;display:block;margin-top:5px}
-table{width:100%;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);border-collapse:collapse}
-th{background:#2d3748;color:#fff;padding:12px}
-td{padding:10px;border-bottom:1px solid #eee;text-align:center;word-break:break-all}
-</style>
+<head><meta charset="UTF-8"><title>Live Analytics Dashboard</title>
+<style>body{font-family:Arial;padding:20px;background:#f5f5f5}h1{background:#fff;padding:15px;border-radius:8px}.cards{display:flex;gap:15px;margin:20px 0;flex-wrap:wrap}.card{background:#fff;padding:20px;border-radius:8px;flex:1;min-width:150px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}th{background:#2d3748;color:#fff;padding:12px}td{padding:10px;border-bottom:1px solid #eee;text-align:center;word-break:break-all}table{width:100%;background:#fff;border-radius:8px;border-collapse:collapse}</style>
 </head>
 <body>
 <h1>📊 Live Analytics Dashboard</h1>
-<div class="cards">
-<div class="card">Total Sessions<b id="totalSessions">0</b></div>
-<div class="card">Total Clicks<b id="totalClicks">0</b></div>
-<div class="card">Total Views<b id="totalViews">0</b></div>
-<div class="card">Total Events<b id="totalEvents">0</b></div>
-</div>
-<table>
-<thead><tr><th>Session ID</th><th>Clicks</th><th>Page Views</th><th>Time</th></tr></thead>
-<tbody id="tableBody"></tbody>
-</table>
+<div class="cards"><div class="card">Total Sessions<br><b id="totalSessions">0</b></div><div class="card">Total Clicks<br><b id="totalClicks">0</b></div><div class="card">Total Views<br><b id="totalViews">0</b></div><div class="card">Total Events<br><b id="totalEvents">0</b></div></div>
+<table><thead><tr><th>Session ID</th><th>Clicks</th><th>Page Views</th><th>Time</th></tr></thead><tbody id="tableBody"></tbody></table>
 <script>
-async function loadData(){
-  try{
-    const res = await fetch('/api/sessions');
-    const data = await res.json();
-    const sessions = data.sessions || data || [];
-    let totalClicks=0, totalViews=0;
-    sessions.forEach(s=>{ 
-      totalClicks+= (s.clicks||0); 
-      totalViews+= (s.pageViews||s.views||s.page_views||s.totalViews||0); 
-    });
-    document.getElementById('totalSessions').innerText = sessions.length;
-    document.getElementById('totalClicks').innerText = totalClicks;
-    document.getElementById('totalViews').innerText = totalViews;
-    document.getElementById('totalEvents').innerText = totalClicks + totalViews;
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-    sessions.forEach(s=>{
-      let dateStr = s.createdAt || s.timestamp || s.time || s.date;
-      let d = dateStr ? new Date(dateStr) : new Date();
-      let timeText = isNaN(d.getTime()) ? 'Just now' : d.toLocaleString('en-IN');
-      let sessionId = s.sessionId || s._id || s.id || 'N/A';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${sessionId}</td><td>${s.clicks||0}</td><td>${s.pageViews||s.views||s.page_views||s.totalViews||0}</td><td>${timeText}</td>`;
-      tbody.appendChild(tr);
-    });
-  }catch(e){ console.error(e); }
+function getId(s){
+  return s.sessionId || s.sessionID || s.session_id || s._id || s.id || s.sid || s.userId || s.visitorId || Object.values(s)[0] || 'N/A';
 }
-loadData();
-setInterval(loadData, 5000);
+async function loadData(){
+  const res = await fetch('/api/sessions');
+  const data = await res.json();
+  const sessions = data.sessions || data.data || data || [];
+  let tc=0,tv=0;
+  sessions.forEach(s=>{tc+=(s.clicks||0); tv+=(s.pageViews||s.views||s.page_views||0);});
+  document.getElementById('totalSessions').innerText=sessions.length;
+  document.getElementById('totalClicks').innerText=tc;
+  document.getElementById('totalViews').innerText=tv;
+  document.getElementById('totalEvents').innerText=tc+tv;
+  const tbody=document.getElementById('tableBody'); tbody.innerHTML='';
+  sessions.forEach(s=>{
+    let d=new Date(s.createdAt||s.timestamp||s.time||Date.now());
+    let t=isNaN(d.getTime())?'Just now':d.toLocaleString('en-IN');
+    let sid=getId(s);
+    tbody.innerHTML+=`<tr><td style="font-family:monospace;font-size:11px">${sid}</td><td>${s.clicks||0}</td><td>${s.pageViews||s.views||s.page_views||0}</td><td>${t}</td></tr>`;
+  });
+}
+loadData(); setInterval(loadData,5000);
 </script>
 </body>
 </html>
