@@ -7,6 +7,7 @@ const Event = require("./models/Event");
 const eventRoutes = require("./routes/events");
 
 const app = express();
+app.use(express.static(path.join(__dirname, '../public')));
 const PORT = Number(process.env.PORT) || 10000;
 
 app.use(cors({
