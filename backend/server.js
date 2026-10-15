@@ -87,15 +87,38 @@ app.get("/api/heatmap", async (req, res, next) => {
 });
 
 // Make the demo available from the backend origin, avoiding file:// CORS issues.
-const demoPath = path.join(__dirname, "../demo");
-const trackerPath = path.join(__dirname, "../tracker");
+const express = require('express');
+const path = require('path');
+const app = express();
+
+const PORT = process.env.PORT || 10000;
+
+const demoPath = path.resolve(__dirname, '../demo');
+const trackerPath = path.resolve(__dirname, '../tracker');
+
+console.log("Demo path:", demoPath);
+console.log("Tracker path:", trackerPath);
+
 app.use("/demo", express.static(demoPath));
 app.use("/tracker", express.static(trackerPath));
+
 app.get("/demo", (req, res) => {
   res.sendFile(path.join(demoPath, "index.html"));
 });
+
+app.get("/tracker/tracker.js", (req, res) => {
+  res.sendFile(path.join(trackerPath, "tracker.js"));
+});
+
 app.get("/", (req, res) => {
   res.redirect("/demo");
+});
+
+// API routes tere jo bhi hain wo iske neeche rehne de
+// ...
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 app.use((error, _req, res, _next) => {
