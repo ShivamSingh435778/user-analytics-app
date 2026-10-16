@@ -2,7 +2,6 @@
 
 **Live:**
 - Demo: https://user-analytics-app-pxav.onrender.com/demo/
-- Dashboard: https://user-analytics-app-pxav.onrender.com/dashboard.html
 
 **Stack:** Node.js, Express, MongoDB, Vanilla JS Tracker
 
