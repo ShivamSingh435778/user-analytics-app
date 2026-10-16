@@ -40,12 +40,13 @@
   sendEvent("page_view");
 
   document.addEventListener("click", (e) => {
-    sendEvent("click", {
-      x: e.clientX,
-      y: e.clientY,
-      clickData: { x: e.clientX, y: e.clientY }
-    });
+  sendEvent("click", {
+    x: e.clientX,
+    y: e.clientY,
+    click_x: e.clientX,
+    click_y: e.clientY
   });
+});
 
   console.log("[Analytics] Tracker ready ->", API_URL);
 })();
