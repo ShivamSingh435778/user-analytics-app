@@ -1,38 +1,43 @@
-(function () {
-  "use strict";
+(() => {
   const API_URL = window.location.origin + "/api/events";
-  const SESSION_KEY = "user_analytics_session_id";
+  const SESSION_KEY = "ua_session_id";
 
-  function createId() {
-    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-    return "session-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
-  }
   function getSessionId() {
     let id = localStorage.getItem(SESSION_KEY);
-    if (!id) { id = createId(); localStorage.setItem(SESSION_KEY, id); }
+    if (!id) {
+      id = "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem(SESSION_KEY, id);
+    }
     return id;
   }
-  function sendEvent(eventType, coordinates) {
-    const payload = {https://user-analytics-app-pxav.onrender.com/tracker.js
-      session_id: getSessionId(),
-      event_type: eventType,
-      page_url: window.location.href,
-      timestamp: new Date().toISOString()
+
+  function sendEvent(eventType, data = {}) {
+    const payload = {
+      sessionId: getSessionId(),
+      eventType: eventType,
+      pageUrl: window.location.href,
+      timestamp: new Date().toISOString(),
+     ...data
     };
-    if (eventType === "click" && coordinates) {
-      payload.click_x = coordinates.x;
-      payload.click_y = coordinates.y;
-    }
+
     fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       keepalive: true
-    }).catch(e => console.warn("[Analytics] fail:", e.message));
+    }).catch(() => {});
   }
+
+  // Page view
   sendEvent("page_view");
-  document.addEventListener("click", function (e) {
-    sendEvent("click", { x: Math.round(e.clientX), y: Math.round(e.clientY) });
-  }, true);
-  window.userAnalytics = { getSessionId: getSessionId };
+
+  // Click tracking
+  document.addEventListener("click", (e) => {
+    sendEvent("click", {
+      x: e.clientX,
+      y: e.clientY
+    });
+  });
+
+  console.log("[Analytics] Tracker ready ->", API_URL);
 })();
