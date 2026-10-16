@@ -121,6 +121,9 @@ async function start() {
     }
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to MongoDB.");
+    app.get('/api/events', (req,res)=>{
+  res.json({ events: global.events || [] });
+});
     app.listen(PORT, () => console.log(`API running at http://localhost:${PORT}`));
   } catch (error) {
     console.error("Could not start server:", error.message);
