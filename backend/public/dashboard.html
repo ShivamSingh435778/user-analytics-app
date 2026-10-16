@@ -12,6 +12,8 @@ h1{background:#fff;padding:15px;border-radius:8px}
 table{width:100%;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);border-collapse:collapse}
 th{background:#2d3748;color:#fff;padding:12px}
 td{padding:10px;border-bottom:1px solid #eee;text-align:center;word-break:break-all;font-size:13px}
+#heatmap-container{position:relative; width:100%; max-width:900px; height:500px; border:2px solid #333; background:#fff; margin-top:20px; border-radius:8px; overflow:hidden; background-image: linear-gradient(#eee 1px, transparent 1px), linear-gradient(90deg, #eee 1px, transparent 1px); background-size:20px 20px;}
+.dot{position:absolute; width:14px; height:14px; background:rgba(255,0,0,0.7); border-radius:50%; transform:translate(-50%,-50%); box-shadow:0 0 8px red;}
 </style>
 </head>
 <body>
@@ -26,12 +28,18 @@ td{padding:10px;border-bottom:1px solid #eee;text-align:center;word-break:break-
 <thead><tr><th>Session ID</th><th>Clicks</th><th>Page Views</th><th>Time</th></tr></thead>
 <tbody id="tableBody"></tbody>
 </table>
+
+<h2 style="margin-top:30px;background:#fff;padding:12px;border-radius:8px;">🔥 Click Heatmap (Live)</h2>
+<div id="heatmap-container"></div>
+<p style="font-size:13px;color:#666;">Red dots = jahan user ne click kiya. Page ko 1920x1080 maan ke scale kiya hai.</p>
+
 <script>
+const API_BASE = ''; // same domain pe hai
+
 async function loadData(){
   try{
     const res = await fetch('/api/sessions');
     const sessions = await res.json();
-    console.log(sessions);
     let totalClicks=0, totalViews=0, totalEvents=0;
     sessions.forEach(s=>{ 
       totalClicks += (s.clicks||0); 
@@ -57,8 +65,38 @@ async function loadData(){
     });
   }catch(e){ console.error(e); }
 }
+
+async function loadHeatmap(){
+  try{
+    // tumhara events endpoint /api/events ya /events ho sakta hai - dono try karo
+    let res = await fetch('/api/events?limit=200');
+    if(!res.ok) res = await fetch('/events?limit=200');
+    if(!res.ok) res = await fetch('/api/analytics?limit=200');
+    const json = await res.json();
+    const events = json.events || json.data || json || [];
+    
+    const container = document.getElementById('heatmap-container');
+    container.innerHTML = '';
+    
+    events.filter(e => e.type==='click' || e.event_type==='click').forEach(ev=>{
+      let x = ev.click_x || ev.x || (ev.clickData && ev.clickData.x);
+      let y = ev.click_y || ev.y || (ev.clickData && ev.clickData.y);
+      if(x==null || y==null) return;
+      
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      // scale: original screen 1920x1080 ko 900x500 me fit karo
+      dot.style.left = (x/1920*100)+'%';
+      dot.style.top = (y/1080*100)+'%';
+      dot.title = `x:${x}, y:${y}`;
+      container.appendChild(dot);
+    });
+  }catch(e){ console.log('heatmap error', e); }
+}
+
 loadData();
-setInterval(loadData, 5000);
+loadHeatmap();
+setInterval(()=>{ loadData(); loadHeatmap(); }, 5000);
 </script>
 </body>
 </html>
