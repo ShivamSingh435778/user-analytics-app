@@ -11,13 +11,16 @@
     return id;
   }
 
-  function sendEvent(eventType, data = {}) {
+  function sendEvent(eventType, extra = {}) {
     const payload = {
       sessionId: getSessionId(),
       eventType: eventType,
       pageUrl: window.location.href,
       timestamp: new Date().toISOString(),
-     ...data
+      userAgent: navigator.userAgent,
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+     ...extra
     };
 
     fetch(API_URL, {
@@ -28,14 +31,13 @@
     }).catch(() => {});
   }
 
-  // Page view
+  // page view
   sendEvent("page_view");
 
-  // Click tracking
+  // click tracking - x,y ko clickData me bhejna hai
   document.addEventListener("click", (e) => {
     sendEvent("click", {
-      x: e.clientX,
-      y: e.clientY
+      clickData: { x: e.clientX, y: e.clientY }
     });
   });
 
