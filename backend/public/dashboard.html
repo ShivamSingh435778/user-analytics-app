@@ -18,6 +18,16 @@ td{padding:10px;border-bottom:1px solid #eee;text-align:center;word-break:break-
 </head>
 <body>
 <h1>📊 Live Analytics Dashboard</h1>
+<button id="clearBtn" style="padding:8px 14px; background:#ff4444; color:white; border:none; border-radius:6px; cursor:pointer; margin-bottom:15px;">🗑️ Clear All Data</button>
+
+<script>
+document.getElementById('clearBtn').onclick = async () => {
+  if(confirm('Saara data delete kar du?')){
+    await fetch('/api/events', { method: 'DELETE' });
+    location.reload();
+  }
+}
+</script>
 <div class="cards">
 <div class="card">Total Sessions<b id="totalSessions">0</b></div>
 <div class="card">Total Clicks<b id="totalClicks">0</b></div>
@@ -75,22 +85,34 @@ async function loadHeatmap(){
     const json = await res.json();
     const events = json.events || json.data || json || [];
     
-    const container = document.getElementById('heatmap-container');
-    container.innerHTML = '';
-    
-    events.filter(e => e.type==='click' || e.event_type==='click').forEach(ev=>{
-      let x = ev.click_x || ev.x || (ev.clickData && ev.clickData.x);
-      let y = ev.click_y || ev.y || (ev.clickData && ev.clickData.y);
-      if(x==null || y==null) return;
-      
-      const dot = document.createElement('div');
-      dot.className = 'dot';
-      // scale: original screen 1920x1080 ko 900x500 me fit karo
-      dot.style.left = (x/1920*100)+'%';
-      dot.style.top = (y/1080*100)+'%';
-      dot.title = `x:${x}, y:${y}`;
-      container.appendChild(dot);
-    });
+   const container = document.getElementById('heatmap-container');
+container.innerHTML = '';
+
+// --- DENSITY LOGIC START ---
+const densityMap = {};
+events.forEach(ev => {
+  let x = ev.click_x || ev.x || (ev.clickData && ev.clickData.x);
+  let y = ev.click_y || ev.y || (ev.clickData && ev.clickData.y);
+  if(x==null || y==null) return;
+  const key = `${Math.round(x/30)*30}_${Math.round(y/30)*30}`;
+  if(!densityMap[key]) densityMap[key] = { x, y, count: 0 };
+  densityMap[key].count++;
+});
+
+Object.values(densityMap).forEach(p => {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.style.left = (p.x/1920*100)+'%';
+  dot.style.top = (p.y/1080*100)+'%';
+  dot.style.width = (8 + p.count * 4) + 'px';
+  dot.style.height = (8 + p.count * 4) + 'px';
+  dot.style.background = `rgba(255, ${255 - p.count*40}, 0, ${Math.min(1, 0.35 + p.count*0.2)})`;
+  dot.style.borderRadius = '50%';
+  dot.style.position = 'absolute';
+  dot.title = `${p.count} clicks at ${p.x},${p.y}`;
+  container.appendChild(dot);
+});
+// --- DENSITY LOGIC END ---
   }catch(e){ console.log('heatmap error', e); }
 }
 
