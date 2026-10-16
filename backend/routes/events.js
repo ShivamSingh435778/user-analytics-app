@@ -36,5 +36,11 @@ router.get("/", async (req, res, next) => {
     res.json({ events });
   } catch (e) { next(e); }
 });
-
+// DELETE /api/events - clear all for demo
+router.delete("/", async (req, res, next) => {
+  try {
+    await Event.deleteMany({});
+    res.json({ message: "All events cleared" });
+  } catch (e) { next(e); }
+});
 module.exports = router;
