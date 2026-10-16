@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  const API_URL = window.USER_ANALYTICS_API_URL || window.location.origin + "/api/events";
+  const API_URL = window.location.origin + "/api/events";
   const SESSION_KEY = "user_analytics_session_id";
 
   function createId() {
@@ -13,7 +13,7 @@
     return id;
   }
   function sendEvent(eventType, coordinates) {
-    const payload = {
+    const payload = {https://user-analytics-app-pxav.onrender.com/tracker.js
       session_id: getSessionId(),
       event_type: eventType,
       page_url: window.location.href,
