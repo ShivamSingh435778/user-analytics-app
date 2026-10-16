@@ -71,8 +71,9 @@ app.get("/api/sessions/:sessionId/events", async (req, res, next) => {
 app.get("/api/heatmap", async (req, res, next) => {
   try {
     const pageUrl = req.query.url;
-    if (!pageUrl || typeof pageUrl !== "string") {
-      return res.status(400).json({ error: "Provide a page URL using ?url=..." });
+    let query = { event_type: "click", click_x: { $exists: true }, click_y: { $exists: true } };
+    if (pageUrl && typeof pageUrl === "string") {
+      query.page_url = pageUrl;
     }
     const clicks = await Event.find({
       page_url: pageUrl,
